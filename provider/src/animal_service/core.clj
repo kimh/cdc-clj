@@ -18,8 +18,7 @@
      :body "NotFound"}))
 
 (defroutes all-routes
-  (GET "/alligators/:name" [name]
-       (get-alligator name)))
+  (GET "/alligators/:name" [name] (get-alligator name)))
 
 (defn -main [& args]
   (run-server (site #'all-routes) {:port 9999}))
