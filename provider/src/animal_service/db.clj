@@ -4,15 +4,15 @@
 (def db-spec {:subprotocol "sqlite"
               :subname "test_db.sqlite"})
 
-(def animal-table-ddl
-  (jdbc/create-table-ddl :animals
+(def table-ddl
+  (jdbc/create-table-ddl :alligators
                          [[:name "varchar(32)"]]))
 
+(defn find-alligators [name]
+  (jdbc/query db-spec ["SELECT * FROM alligators WHERE name = ?" name]))
+
 ;; Create table
-;; (jdbc/db-do-commands db-spec [animal-table-ddl])
+;; (jdbc/db-do-commands db-spec [table-ddl])
 
 ;; Insert initial data
-;; (jdbc/insert! db-spec :animals {:name "Mary"})
-
-;; Select raw
-;; (jdbc/query db-spec ["SELECT * FROM animals WHERE name = ?" "Mary"])
+;; (jdbc/insert! db-spec :alligators {:name "Mary"})
