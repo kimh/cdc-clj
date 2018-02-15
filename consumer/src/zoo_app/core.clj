@@ -1,7 +1,8 @@
 (ns zoo-app.core
   (:gen-class)
   (:require [clojure.data.json :as json]
-            [org.httpkit.client :as http]))
+            [clj-http.client :as http]
+            [clojure.spec.alpha :as s]))
 
 (def animal-service-url "http://localhost:9999")
 
@@ -17,12 +18,28 @@
 (defn ->error []
   {:error "something bad happend"})
 
+(s/def :zoo/id int?)
+(s/def :zoo/name string?)
+(s/def ::alligator (s/keys :req [:zoo/id :zoo/name]))
+
+;; TODO: can we do something like this?
+;; some concerns;
+;; - how do we save the contract and replya on server?
+;; - when verify the contract on server test, how do we populate data?
+(defn contract-get-alligator-by-name []
+  (let [name "Mary"]
+    [{:request {:method :get
+                :path (format "/alligators/" name)
+                :prepare #(assoc (s/gen ::alligator) :name name)}
+      :recieve {:status 200
+                :body {:name name}}}]))
+
 (defn get-alligator-by-name
-  [name]
-  (let [res (http/get (format "%s/alligators/%s" animal-service-url name) {:as :text})
-        status (:status @res)]
+  [url name]
+  (let [res (http/get (format "%s/alligators/%s" url name) {:accept :json})
+        status (:status res)]
     (case status
-      200 (->ok (:body @res))
+      200 (->ok (:body res))
       404 (->not-found)
       (->error))))
 

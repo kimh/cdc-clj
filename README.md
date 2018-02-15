@@ -14,3 +14,8 @@ Contract Testing boils down to the following steps
  - compare the response with recorded expecation
 
 Let's do above with bare metal clojure code!
+
+### TODO
+
+- how do we replay contract on provider side?
+- how can we create a DB?

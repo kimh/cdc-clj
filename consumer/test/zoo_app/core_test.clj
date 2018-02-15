@@ -1,7 +1,4 @@
 (ns zoo-app.core-test
   (:require [clojure.test :refer :all]
-            [zoo-app.core :refer :all]))
-
-(deftest a-test
-  (testing "FIXME, I fail."
-    (is (= 0 1))))
+            [clj-http.client :as http]
+            [zoo-app.core :as zoo]))
