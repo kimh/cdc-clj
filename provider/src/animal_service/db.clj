@@ -7,6 +7,8 @@
 (def table-ddl
   (jdbc/create-table-ddl :alligators
                          [[:name "varchar(32)"]]))
+(defn insert-alligator [alligator-map]
+  (jdbc/insert! db-spec :alligators alligator-map))
 
 (defn find-alligators [name]
   (jdbc/query db-spec ["SELECT * FROM alligators WHERE name = ?" name]))

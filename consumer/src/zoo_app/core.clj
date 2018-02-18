@@ -29,10 +29,9 @@
 (defn contract-get-alligator-by-name []
   (let [name "Mary"]
     [{:request {:method :get
-                :path (format "/alligators/" name)
-                :prepare #(assoc (s/gen ::alligator) :name name)}
+                :path (format "/alligators/" name)}
       :recieve {:status 200
-                :body {:name name}}}]))
+                :body {:name name :family "alligatoridae"}}}]))
 
 (defn get-alligator-by-name
   [url name]

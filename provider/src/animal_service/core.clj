@@ -3,36 +3,46 @@
   (:require [clojure.data.json :as json]
             [animal-service.db :as db]
             [clojure.spec.alpha :as s]
+            [clojure.spec.gen.alpha :as gen]
             [clojure.spec.test.alpha :as stest])
   (:use [compojure.route :only [files not-found]]
         [compojure.handler :only [site]]
         [compojure.core :only [defroutes GET POST DELETE ANY context]]
         org.httpkit.server))
 
-;; (s/fdef ranged-rand
-;;         :args (s/and (s/cat :start int? :end int?)
-;;                      #(< (:start %) (:end %)))
-;;         :ret int?
-;;         :fn (s/and #(>= (:ret %) (-> % :args :start))
-;;                    #(< (:ret %) (-> % :args :end))))
-;; (s/def ::status int?)
-;; (s/def ::body string?)
-;; (s/def ::response (s/keys :req [::status ::body]))
+(defn have-one
+  ([spec] (have-one spec {}))
+  ([spec overrides]
+   {:spec spec :count 1 :overrides overrides}))
 
-;; (s/fdef get-alligator
-;;         :args (s/cat :name string?)
-;;         :ret ::response)
-(s/def :zoo/id int?)
-(s/def :zoo/name string?)
-(s/def ::alligator (s/keys :req [:zoo/id :zoo/name]))
+(s/def :animal/name string?)
+(s/def :animal/alligator (s/keys :req [:animal/name]))
+
+
+(defn to-file
+  "Save a clojure form to a file"
+  [file form]
+  (with-open [w (java.io.FileWriter. file)]
+    (print-dup form w)))
+
+(defn from-file
+  "Load a clojure form from file."
+  [file]
+  (with-open [r (java.io.PushbackReader. (java.io.FileReader. file))]
+    (read r)))
+
+;; TODO
+;; write defcontract macro
+(defmacro defcontract [contract]
+  (to-file "/tmp/foo" contract))
 
 (defn contract-get-alligator-by-name []
-  (let [name "Mary"]
-    {:request {:method :get
-               :path (format "/alligators/%s" name)
-               :prepare #(assoc (s/gen ::alligator) :name name)}
-     :expect {:status 200
-               :body {"name" name}}}))
+  (let [name "Mike"]
+    {:context (have-one :animal/alligator {:animal/name name})
+     :request {:method :get
+               :path (format "/alligators/%s" name)}
+     :expects {:status 200
+               :body "{\"name\":\"Mike\"}"}}))
 
 (defn get-alligator
   [name]
