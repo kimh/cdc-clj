@@ -33,8 +33,12 @@
 
 ;; TODO
 ;; write defcontract macro
-(defmacro defcontract [contract]
-  (to-file "/tmp/foo" contract))
+(defmacro defcontract [name contract]
+  (let [file-name (gensym 'message)]
+    `(let [~file-name ~(format "/tmp/%s" name)]
+       (to-file ~file-name ~contract)
+       (println "write to" ~file-name)
+       ~contract)))
 
 (defn contract-get-alligator-by-name []
   (let [name "Mike"]
