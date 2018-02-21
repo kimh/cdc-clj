@@ -31,13 +31,15 @@
   (with-open [r (java.io.PushbackReader. (java.io.FileReader. file))]
     (read r)))
 
-;; TODO
-;; write defcontract macro
 (defmacro defcontract [name contract]
-  `(let [file-name# ~(format "/tmp/%s" name)]
-     (to-file file-name# ~contract)
-     (println "write to" file-name#)
-     ~contract))
+  `(if (resolve '~name)
+     '(alter-meta! (var ~name) #(assoc % :kim "kim"))))
+
+(defn kim-func []
+  "kim!!")
+
+(defn kim-func2 []
+  "kim!!")
 
 (defn contract-get-alligator-by-name []
   (let [name "Mike"]
