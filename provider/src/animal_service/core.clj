@@ -31,15 +31,22 @@
   (with-open [r (java.io.PushbackReader. (java.io.FileReader. file))]
     (read r)))
 
+;; TODO: this breaks when name var doesn't exist. How can I fix it?
 (defmacro defcontract [name contract]
   `(if (resolve '~name)
-     '(alter-meta! (var ~name) #(assoc % :kim "kim"))))
+     (alter-meta! (var ~name) #(assoc % :contracts ~contract))))
 
-(defn kim-func []
-  "kim!!")
-
-(defn kim-func2 []
-  "kim!!")
+(defn save-contracts []
+  (let [ns-vars (vals (ns-publics 'animal-service.core))
+        contracts (remove nil? (map (fn [v]
+                                      (if-let [contexts (-> v meta :contracts)]
+                                        {(-> v meta :name str) contexts}))
+                                    ns-vars))]
+    (doseq [c contracts]
+      (let [name (first (keys c))
+            contracts (first (vals c))]
+        (prn "writing contracts" (format "/tmp/contracts/%s.clj" name))
+        (to-file (format "/tmp/contracts/%s.clj" name) contracts)))))
 
 (defn contract-get-alligator-by-name []
   (let [name "Mike"]
@@ -58,6 +65,13 @@
      :body (json/write-str alligator)}
     {:status  404
      :body "NotFound"}))
+
+(defcontract get-alligator
+  {:context {:spec :animal/alligator :count 1 :overrides {:animal/name "Mike"}}
+   :request {:method :get
+             :path (format "/alligators/%s" "Mike")}
+   :expects {:status 200
+             :body "{\"name\":\"Mike\"}"}})
 
 (defroutes all-routes
   (GET "/alligators/:name" [name] (get-alligator name)))
